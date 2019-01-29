@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace ProdutosForm
+namespace ProdutoForm
 {
     static class Program
     {
@@ -16,7 +16,7 @@ namespace ProdutosForm
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new ProdutosForm());
+            Application.Run(new Form1());
         }
     }
 }
