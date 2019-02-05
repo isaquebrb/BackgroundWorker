@@ -1,4 +1,5 @@
-﻿using Entity;
+﻿using DataAccess;
+using Entity;
 using System;
 using System.ComponentModel;
 using System.Configuration;
@@ -17,7 +18,7 @@ namespace CategoriasForm
         public ProdutosForm()
         {
             InitializeComponent();
-            _bancoExiste = InitializeDataBase();
+            InitializeDataBase();
             backgroundWorker.WorkerReportsProgress = true;
         }
 
@@ -39,6 +40,8 @@ namespace CategoriasForm
             dataGridView.RowHeadersWidth = 21;
             dataGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.EnableResizing;
             dataGridView.ColumnHeadersHeight = 23;
+
+            _bancoExiste = CriarBancoDeDados.verificaSeExisteBanco();
 
             if (_bancoExiste)
                 _nomeStrConexao = "conexaoDB";

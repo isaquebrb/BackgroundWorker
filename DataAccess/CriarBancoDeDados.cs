@@ -9,32 +9,37 @@ namespace DataAccess
 {
     public class CriarBancoDeDados
     {
-        protected SqlConnection Conexao;
+        protected static SqlConnection Conexao;
+        protected static string _nomeBanco = "BackgroundWorker";
 
         public CriarBancoDeDados(string strDiretorioDb)
         {
-            CriarArquivoBanco(strDiretorioDb);
-            CriarTabelaBanco();
-            CriarEntidades();
+            bool bancoExiste = verificaSeExisteBanco();
+
+            if (!bancoExiste)
+            {
+                CriarArquivoBanco(strDiretorioDb);
+                CriarTabelaBanco();
+                CriarEntidades();
+            }
         }
 
         private void CriarArquivoBanco(string strDiretorioDb)
         {
             try
             {
-                CriarConexao("conexaoInicialDB");
                 AbrirConexao();
 
-                string strCommand = $@"CREATE DATABASE BackgroundWorker  
+                string strCommand = $@"CREATE DATABASE {_nomeBanco}  
                                         ON   
-                                        ( NAME = BackgroundWorker_db,  
-                                            FILENAME = '{strDiretorioDb}\\BackgroundWorker_db.mdf',  
+                                        ( NAME = {_nomeBanco}_db,  
+                                            FILENAME = '{strDiretorioDb}\\{_nomeBanco}_db.mdf',  
                                             SIZE = 10,  
                                             MAXSIZE = 50,  
                                             FILEGROWTH = 5 )  
                                         LOG ON  
                                         (NAME = BackgroundWorker_log,  
-                                            FILENAME = '{strDiretorioDb}\\BackgroundWorker_log.ldf',  
+                                            FILENAME = '{strDiretorioDb}\\{_nomeBanco}_log.ldf',  
                                             SIZE = 5MB,  
                                             MAXSIZE = 25MB,  
                                             FILEGROWTH = 5MB)";
@@ -59,7 +64,7 @@ namespace DataAccess
         {
             try
             {
-                CriarConexao("conexaoDB");
+                CriarConexao("newConexaoDB");
                 AbrirConexao();
 
                 string strCommand = @"CREATE TABLE Categorias (
@@ -88,7 +93,7 @@ namespace DataAccess
             }
             finally
             {
-
+                FecharConexao();
             }
         }
 
@@ -171,24 +176,26 @@ namespace DataAccess
                 {
                     PreencherTabelas(produto);
                 }
-
-                FecharConexao();
             }
             catch (Exception)
             {
                 throw;
             }
+            finally
+            {
+                FecharConexao();
+            }
         }
 
         #region Métodos Úteis
-        protected void CriarConexao(string strConexao)
+        protected static void CriarConexao(string strConexao)
         {
             string strConnection = ConfigurationManager.ConnectionStrings[strConexao].ConnectionString;
 
             Conexao = new SqlConnection(strConnection);
         }
 
-        protected void AbrirConexao()
+        protected static void AbrirConexao()
         {
             if (Conexao.State == ConnectionState.Closed)
             {
@@ -196,13 +203,50 @@ namespace DataAccess
             }
         }
 
-        protected void FecharConexao()
+        protected static void FecharConexao()
         {
             if (Conexao.State == ConnectionState.Open)
             {
                 Conexao.Close();
             }
 
+        }
+
+        public static bool verificaSeExisteBanco()
+        {
+            CriarConexao("conexaoInicialDB");
+            bool result = false;
+
+            try
+            {
+                AbrirConexao();
+
+                string strCommand = $"SELECT database_id FROM sys.databases WHERE Name = '{_nomeBanco}'";
+
+                using (SqlCommand sqlCommand = new SqlCommand(strCommand, Conexao))
+                {
+                    object resultObj = sqlCommand.ExecuteScalar();
+
+                    int databaseId = 0;
+
+                    if (resultObj != null)
+                    {
+                        int.TryParse(resultObj.ToString(), out databaseId);
+                    }
+
+                    result = (databaseId > 0);
+                }
+            }
+            catch (Exception e)
+            {
+                result = false;
+            }
+            finally
+            {
+                FecharConexao();
+            }
+
+            return result;
         }
         #endregion
     }

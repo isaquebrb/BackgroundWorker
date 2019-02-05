@@ -113,7 +113,7 @@ namespace CategoriasForm
 
         #endregion
 
-        private bool InitializeDataBase()
+        private void InitializeDataBase()
         {
             string strDiretorioSolution = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
             string strDiretorioDb = $"{strDiretorioSolution}\\DataAccess\\BancoDeDados";
@@ -143,10 +143,7 @@ namespace CategoriasForm
                 diretorioDb.SetAccessControl(segurancaDiretorio);
 
                 CriarBancoDeDados createDb = new CriarBancoDeDados(strDiretorioDb);
-                return false;
             }
-            else
-                return true;
         }
 
         private System.ComponentModel.BackgroundWorker backgroundWorker;
