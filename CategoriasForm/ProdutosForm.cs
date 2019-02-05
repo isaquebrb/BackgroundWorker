@@ -11,9 +11,9 @@ namespace CategoriasForm
 {
     public partial class ProdutosForm : Form
     {
-        bool _bancoExiste;
-        private int _totalRegistros;
-        string _nomeStrConexao = string.Empty;
+        private bool _bancoExiste;
+        private string _nomeStrConexao = string.Empty;
+        private int _totalRegistros = 0;
 
         public ProdutosForm()
         {
@@ -41,12 +41,12 @@ namespace CategoriasForm
             dataGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.EnableResizing;
             dataGridView.ColumnHeadersHeight = 23;
 
-            _bancoExiste = CriarBancoDeDados.verificaSeExisteBanco();
+            _bancoExiste = Infra.verificaSeExisteBanco();
 
             if (_bancoExiste)
-                _nomeStrConexao = "conexaoDB";
+                _nomeStrConexao = "conexaoComBanco";
             else
-                _nomeStrConexao = "newConexaoDB";
+                _nomeStrConexao = "conexaoNova";
         }
 
         private void backgroundWorker_DoWork(object sender, DoWorkEventArgs e)
@@ -137,7 +137,8 @@ namespace CategoriasForm
         {
             progressBar.Visible = true;
             lblProgressBar.Visible = true;
-            progressBar.Maximum = TotalRegistros();
+            _totalRegistros = Infra.TotalRegistros(_nomeStrConexao);
+            progressBar.Maximum = _totalRegistros;
 
             if (!backgroundWorker.IsBusy)
             {
@@ -158,30 +159,6 @@ namespace CategoriasForm
                 btnCancelar.Enabled = false;
                 btnProdutos.Enabled = true;
             }
-        }
-
-        private int TotalRegistros()
-        {
-            string strConnection = ConfigurationManager.ConnectionStrings[_nomeStrConexao].ConnectionString;
-            SqlConnection Conexao = new SqlConnection(strConnection);
-
-            try
-            {
-                Conexao.Open();
-                using (SqlCommand sqlComannd = new SqlCommand("SELECT COUNT(*) FROM Produtos", Conexao))
-                {
-                    _totalRegistros = int.TryParse(sqlComannd.ExecuteScalar().ToString(), out int result) ? result : 0;
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-            finally
-            {
-                Conexao.Close();
-            }
-            return _totalRegistros;
         }
     }
 }

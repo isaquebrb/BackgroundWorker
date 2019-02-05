@@ -142,7 +142,7 @@ namespace CategoriasForm
                 segurancaDiretorio.AddAccessRule(permissaoUsuario2);
                 diretorioDb.SetAccessControl(segurancaDiretorio);
 
-                CriarBancoDeDados createDb = new CriarBancoDeDados(strDiretorioDb);
+                Infra createDb = new Infra(strDiretorioDb);
             }
         }
 
